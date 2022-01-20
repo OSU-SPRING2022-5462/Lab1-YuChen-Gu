@@ -33,20 +33,20 @@ int main(int argc, char *argv[]) {
     serverAddress.sin_port = htons(portNum);
     serverAddress.sin_addr.s_addr = INADDR_ANY;
 
-    returnCode = bind(newSocket,buffer, (struct sockaddr *) & serverAddress,sizeof(serverAddress));
+    returnCode = bind(newSocket, (struct sockaddr *) & serverAddress,sizeof(serverAddress));
 
-    if (rc<0){
+    if (returnCode<0){
         perror ("bind");
-        exit(1)
+        exit(1);    
     }
-    for(;;;){
+    for(;;){
         memset(buffer,'\0',100);
-        returnCode = recvfrom(newSocket,buffer,sizeof(buffer),flag,(struct sockaddr *) &clientAddress, &clientLength ));
-        if(rc<=0){
+        returnCode = recvfrom(newSocket,buffer,sizeof(buffer),flag,(struct sockaddr *) &clientAddress, &clientLength);
+        if(returnCode<=0){
             printf("error on receive, quitting...");
             break;
         }
-        printf("Reveived %d bytes\n",returnCode);
+        printf("Reveived %d bytes: %s\n",returnCode, buffer);
     }
     return 0;
 }
