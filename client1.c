@@ -1,5 +1,6 @@
 /*
  * This program is a data-gram socket client file. It is based on the simple DGRAM socket client illustrated by Professor Dave Ogle, and further implemented and modifed by YuChen Gu on 1/18/2022.
+ * This client will keep prompting user for messages until a "STOP" is inputted. This "STOP" will not be sent. Message with spaces are supported.
  */
 #include <string.h>
 #include <stdio.h>
@@ -22,7 +23,7 @@ int main(int argc, char *argv[])
     char buffer[100];/*data buffer*/
 
     if (argc < 3){/*run only if correct syntax on cmd line*/
-        printf("usage is: client <remote IP Address> <remote port number>");
+        printf("usage is: client <remote IP Address> <remote port number>\n");
         exit(1);
     }
 
@@ -44,16 +45,22 @@ int main(int argc, char *argv[])
         memset (buffer,'\0',100);
         printf("Enter your message: ");
         scanf ("%[^\n]%*c", msg);
-        if(strcmp(msg, "STOP")!=0){
-            sprintf(buffer, "%s", msg);
-            printf("Sending \"%s\" of %lu bytes\n", buffer, strlen(buffer));
-
-            /*call helper to send message*/
-            sendMsg(buffer, newSocket, serverAddress);
+        if (strlen(msg)>100 || strlen(msg) == 0){/*check input size*/
+            printf("Your input exceeded buffer size or entered empty input, try again.\n");
+            getchar();
         }else{
-            printf("\nShutting down client...");
-            close (newSocket);
-            return (0);
+            if(strcmp(msg, "STOP")!=0){/*if no STOP signal, send*/
+                sprintf(buffer, "%s", msg);/*msg into buffer*/
+                printf("Sending \"%s\" of %lu bytes\n", buffer, strlen(buffer));
+
+                /*call helper to send message*/
+                sendMsg(buffer, newSocket, serverAddress);
+                while ( getchar() != '\n');
+            }else{/*if STOP signal, shutdown*/
+                printf("\nShutting down client...\n");
+                close (newSocket);
+                return (0);
+            }
         }
     }
     
@@ -65,10 +72,9 @@ int sendMsg(char *buffer, int newSocket, struct sockaddr_in serverAddress){
     /*setup return code*/
     int returnCode = 0;
     /*send msg*/
-    printf ("%s",buffer);
     returnCode = sendto(newSocket, buffer, strlen(buffer), 0, (struct sockaddr *)&serverAddress, sizeof(serverAddress));
 
-    printf("sending %d bytes", returnCode);
+    printf("sending %d bytes\n", returnCode);
     
     return (0);
 }
