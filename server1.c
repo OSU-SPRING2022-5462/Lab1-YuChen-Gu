@@ -12,37 +12,41 @@
  
  
 int main(int argc, char *argv[]) { 
-    int newSocket;
-    int returnCode;
-    struct sockaddr_in serverAddress;
-    struct sockaddr_in clientAddress;
-    char buffer[100];
-    int flag = 0;
-    int portNum;
-    socklen_t clientLength = sizeof(struct sockaddr);
+    int newSocket;/*socket describer*/
+    int returnCode;/*return code*/
+    struct sockaddr_in serverAddress;/*server address*/
+    struct sockaddr_in clientAddress;/*client address*/
+    char buffer[100];/*buffer*/
+    int flag = 0;/*socket call flags*/
+    int portNum;/*local port*/
+    socklen_t clientLength = sizeof(struct sockaddr);/*client socket length*/
 
-    if (argc < 2){
+    if (argc < 2){/*check cmd line syntax*/
         printf("usage is: server <portNumber>\n");
         exit(1);
     }
 
     portNum = atoi(argv[1]);
 
+    /*create socket*/
     newSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    /*fill server address*/
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(portNum);
     serverAddress.sin_addr.s_addr = INADDR_ANY;
 
+    /*bind socket with address*/
     returnCode = bind(newSocket, (struct sockaddr *) & serverAddress,sizeof(serverAddress));
 
-    if (returnCode<0){
+    if (returnCode<0){/*check return code for binding process*/
         perror ("bind");
         exit(1);    
     }
     for(;;){
-        memset(buffer,'\0',100);
+        memset(buffer,'\0',100);/*reset buffer*/
+        /*receive data*/
         returnCode = recvfrom(newSocket,buffer,sizeof(buffer),flag,(struct sockaddr *) &clientAddress, &clientLength);
-        if(returnCode<=0){
+        if(returnCode<=0){/*check receive return code*/
             printf("error on receive, quitting...");
             break;
         }
